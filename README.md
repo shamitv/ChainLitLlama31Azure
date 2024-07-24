@@ -11,3 +11,7 @@ Initial Output :
 
 
 ![image](https://github.com/user-attachments/assets/96ebb05d-8ff3-47d9-9217-c9794821fe97)
+
+
+This is based on following Chainlit Cookbook for OpenAI : https://github.com/Chainlit/cookbook/tree/main/langchain-ask-human
+
