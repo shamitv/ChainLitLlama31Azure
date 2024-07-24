@@ -3,12 +3,15 @@ import os
 from langchain.chains.llm_math.base import LLMMathChain
 from langchain.agents import initialize_agent, Tool, AgentType, AgentExecutor
 from langchain_community.chat_models.azureml_endpoint import (LlamaChatContentFormatter, AzureMLChatOnlineEndpoint)
-from typing import *
 from langchain.tools import BaseTool
 
 import chainlit as cl
 from chainlit.sync import run_sync
 from langchain_community.llms.azureml_endpoint import AzureMLEndpointApiType
+
+import langchain
+
+langchain.debug = True
 
 
 class HumanInputChainlit(BaseTool):
@@ -63,7 +66,20 @@ def start():
         ),
     ]
     agent = initialize_agent(
-        tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True
+        tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True, handle_parsing_errors=True
     )
 
     cl.user_session.set("agent", agent)
+
+@cl.on_message
+async def main(message: cl.Message):
+    agent = cl.user_session.get("agent")  # type: AgentExecutor
+    res = await agent.arun(
+        message.content, callbacks=[cl.AsyncLangchainCallbackHandler()]
+    )
+    await cl.Message(content=res).send()
+
+
+if __name__ == "__main__":
+    from chainlit.cli import run_chainlit
+    run_chainlit(__file__)
